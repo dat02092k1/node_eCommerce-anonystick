@@ -1,0 +1,24 @@
+1 Nhược điểm của cách connect cũ
+như cách lv0, nếu làm tương tự ở Java, PHP, ... hàm connect db
+sẽ bị gọi nhiều lần dẫn đến nhiều connect được tạo ra trong CSDL
+2 Cách connect mới, khuyên dùng
+sử dụng singleton
+3 Kiểm tra hệ thống có bao nhiêu connect
+use mongoose.connections.length
+4 THông báo khi server quá tải connect
+5 Có nên disConnect liên tục hay không?
+6 PoolSize là gì? vì sao lại quan trọng?
+7 Nếu vượt quá kết nối poolsize?
+8 MongoDB Desing pattern
+      - Polymorphic pattern
+      - Attribute pattern
+      - Bucket pattern
+      - Outlier pattern
+      - Computed pattern
+      - Subnet pattern
+      - Extended reference pattern
+      - Approximation pattern
+      - Tree pattern
+      - Preallocation pattern
+      - Document versioning pattenr
+      - Schema versioning pattern

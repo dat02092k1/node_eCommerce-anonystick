@@ -13,7 +13,11 @@ app.use(compression())
     // morgan("short")
     // morgan("tiny");
 // init db
+require('./dbs/init.mongodb');
+const {countConnect, checkOverload} = require('./helpers/check.connect');
+    checkOverload();
 
+countConnect();
 // init routes
 app.get('/', (req, res, next) => {
     const strCompress = 'Heh fapcist'; 
