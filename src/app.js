@@ -1,3 +1,4 @@
+require('dotenv').config;
 const express = require('express');
 const app = express(); 
 const morgan = require('morgan');
@@ -15,9 +16,7 @@ app.use(compression())
 // init db
 require('./dbs/init.mongodb');
 const {countConnect, checkOverload} = require('./helpers/check.connect');
-    checkOverload();
 
-countConnect();
 // init routes
 app.get('/', (req, res, next) => {
     const strCompress = 'Heh fapcist'; 
