@@ -6,13 +6,13 @@ const helmet = require('helmet');
 const compression = require('compression');
 
 // init middleware
-app.use(morgan("dev"))  
+// app.use(morgan("dev"))  
 app.use(helmet())
 app.use(compression())
-    // morgan("compile")
-    // morgan("common")
-    // morgan("short")
-    // morgan("tiny");
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
 // init db
 require('./dbs/init.mongodb');
 const {countConnect, checkOverload} = require('./helpers/check.connect');

@@ -9,7 +9,7 @@ mongoose.connect(connectString)
         .catch((err) => console.log('Error connect'));
 
 // dev
-if (1 === 1) {
-    mongoose.set('debug', true);
-    mongoose.set('debug', { color: true }); 
-}
+// if (1 === 1) {
+//     mongoose.set('debug', true);
+//     mongoose.set('debug', { color: true }); 
+// }
