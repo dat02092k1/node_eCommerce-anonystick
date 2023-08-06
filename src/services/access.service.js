@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const keyTokenService = require('./keyToken.service');
 const { createTokenPair } = require('../auth/authUtils');
 const { getInfoData } = require('../utils');
+const { Api403Error, BusinessLogicError } = require('../core/error.response');
 
 const RoleShop = {
     SHOP: 'SHOP',
@@ -18,16 +19,11 @@ const RoleShop = {
 
 class AccessService { 
     static signUp = async ({ name, email, password }) => {
-        try {
             // s1: check email existence
-
             const hodelShop = await shopModel.findOne({ email }).lean(); // return JS object 
 
             if (hodelShop) {
-                return {
-                    code: 'xxx',
-                    message: 'Shop already exists'
-                }
+                    throw new Api403Error('Error: Shop already exists');
             }
 
             const passwordHash = await bcrypt.hash(password, 10); 
@@ -58,10 +54,7 @@ class AccessService {
                 });
                 
                 if (!publicKeyString) {
-                    return {
-                        code: 'xxx',
-                        message: 'publicKeyString error',
-                    }
+                    throw new BusinessLogicError('Error: Create publicKeyString failed'); 
                 }
                 
                 const publicKeyObject = crypto.createPublicKey(publicKeyString);
@@ -87,14 +80,6 @@ class AccessService {
                 code: 200,
                 metadata: null
             }
-
-        } catch (error) {
-            return {
-                code: 'xxx',
-                message: error.message,
-                status: 'error',
-            }                     
-        }
     }
 }
 
