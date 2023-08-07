@@ -7,8 +7,9 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const keyTokenService = require('./keyToken.service');
 const { createTokenPair } = require('../auth/authUtils');
-const { getInfoData } = require('../utils');
-const { Api403Error, BusinessLogicError } = require('../core/error.response');
+const { getInfoData, generateKeys } = require('../utils');
+const { Api403Error, BusinessLogicError, Api401Error } = require('../core/error.response');
+const { findByEmail } = require('./shop.service');
 
 const RoleShop = {
     SHOP: 'SHOP',
@@ -18,6 +19,53 @@ const RoleShop = {
 }
 
 class AccessService { 
+    /**
+     * 1) check email in db
+     * 2) check match password
+     * 3) create AT and RT then save
+     * 4) generate tokens
+     * 5) get data return 
+     */
+    static login = async ({ email, password, refreshToken = null }) => {
+        console.log({ email });
+        // 1.
+        const foundShop = await findByEmail({email});
+         
+        if (!foundShop) {
+            throw new Api403Error('Error: Shop not registered'); 
+        }
+
+        // 2.
+        const match = bcrypt.compare(password, foundShop.password);
+
+        if (!match) throw new Api401Error('Authentication error'); 
+
+        // 3.
+        const { privateKey, publicKey } = generateKeys();
+        // 4. create access token and refresh token 
+        const { _id: userId } = foundShop;
+
+        const tokens = await createTokenPair({
+            userId,
+            email
+        }, publicKey, privateKey);
+
+        await keyTokenService.createToken({
+            userId,
+            publicKey, 
+            privateKey,
+            refreshToken: tokens.refreshToken,
+        })
+
+        return {
+            metadata: {
+                shop: getInfoData({ fields: ['_id', 'name', 'email'], object: foundShop }),
+                tokens
+            }
+        }
+
+    }  
+
     static signUp = async ({ name, email, password }) => {
             // s1: check email existence
             const hodelShop = await shopModel.findOne({ email }).lean(); // return JS object 
@@ -34,23 +82,13 @@ class AccessService {
 
             if (newShop) {
                 // create private key & public key
-                const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { 
-                    modulusLength: 4096,
-                    publicKeyEncoding: {
-                        type: 'pkcs1',
-                        format: 'pem'
-                    },
-                    privateKeyEncoding: {
-                        type: 'pkcs1',
-                        format: 'pem'
-                    }
-                });
+                const { privateKey, publicKey } = generateKeys();
 
                 console.log(privateKey, '---', publicKey);
 
                 // save collection Keystore
                 const publicKeyString = await keyTokenService.createToken({
-                    userId: newShop._id, publicKey
+                    userId: newShop._id, publicKey, privateKey
                 });
                 
                 if (!publicKeyString) {
@@ -63,7 +101,7 @@ class AccessService {
                 const tokens = await createTokenPair({
                     userId: newShop._id,
                     email
-                }, publicKeyString, privateKey)
+                }, publicKeyObject, privateKey)
                 
                 console.log(`creating token pair::`, tokens);
 
