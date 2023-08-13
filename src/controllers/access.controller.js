@@ -5,7 +5,7 @@ const { CREATED, OK } = require("../core/success.response");
 const AccessService = require("../services/access.service");
 
 class AccessController {
-     login = asyncHandler(async (req, res, next) => {
+    login = asyncHandler(async (req, res, next) => {
         OK(res, 'Login success', await AccessService.login(req.body))
     })
 
@@ -20,6 +20,9 @@ class AccessController {
         // return res.status(201).json(
         //     await AccessService.signUp(req.body)
         // );
+})
+    logout = asyncHandler(async (req, res, next) => {
+    OK(res, 'Logout success', await AccessService.logout(req.keyStore))
 })
 }
 
